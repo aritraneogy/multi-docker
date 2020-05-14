@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t aritraneogydev/rect-test -f /client/Dockerfile.dev ./client
+
+script:
+  - docker -e CI=true run aritraneogydev/react-test npm test
+
+after_success:
+  - docker build -t aritraneogydev/multi-client ./client
+  - docker build -t aritraneogydev/multi-nginx ./nginx
+  - docker build -t aritraneogydev/multi-server ./server
+  - docker build -t aritraneogydev/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push aritraneogydev/multi-client
+  - docker push aritraneogydev/multi-nginx
+  - docker push aritraneogydev/multi-server
+  - docker push aritraneogydev/multi-worker
+
